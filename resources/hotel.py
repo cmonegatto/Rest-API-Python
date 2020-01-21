@@ -1,5 +1,6 @@
 from flask_restful 		import Resource, reqparse
 from models.hotel 		import HotelModel
+from models.site import SiteModel
 from flask_jwt_extended import jwt_required
 import sqlite3
 from resources.filtros 	import normalize_path_params, consulta_sem_cidade, consulta_com_cidade
@@ -76,8 +77,11 @@ class Hotel(Resource):
 			return {"message": "Hotel id '{}'already exists.".format(hotel_id)}, 400
 
 		dados = Hotel.argumentos.parse_args()
-
 		hotel = HotelModel(hotel_id, **dados)
+
+		if not SiteModel.find_by_id(dados.get['site_id']):
+			return {'message': 'Hotel precisa estar associaddo a um site_id valido'}, 400
+
 
 		try:
 			hotel.save_hotel()
